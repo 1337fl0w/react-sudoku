@@ -26,7 +26,6 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   darkMode,
   handleFocus,
   handleBlur,
-  handleInputChange,
   highlightedNote,
 }) => {
   const isTopEdge = rowIndex % 3 === 0;
@@ -41,6 +40,9 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
       (Math.floor(focusedCell.row / 3) === Math.floor(rowIndex / 3) &&
         Math.floor(focusedCell.col / 3) === Math.floor(colIndex / 3)));
 
+  const isFocused =
+    focusedCell && focusedCell.row === rowIndex && focusedCell.col === colIndex;
+
   const isMistake =
     mistake && mistake.row === rowIndex && mistake.col === colIndex;
 
@@ -52,6 +54,10 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
         position: "relative",
         backgroundColor: isMistake
           ? "red"
+          : isFocused
+          ? darkMode
+            ? "rgba(255, 255, 255, 0.4)" // Brighter background for the focused cell
+            : "rgba(0, 0, 0, 0.2)"
           : isHighlighted
           ? darkMode
             ? "rgba(255, 255, 255, 0.2)"
@@ -83,14 +89,16 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
         paddingTop: "11.11%",
         margin: 0,
         overflow: "hidden",
+        cursor: "pointer",
       }}
+      onClick={() => handleFocus(rowIndex, colIndex)}
     >
       <Form.Control
         type="text"
         value={value}
+        readOnly
         onFocus={() => handleFocus(rowIndex, colIndex)}
         onBlur={handleBlur}
-        onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
         style={{
           textAlign: "center",
           padding: "10px",
