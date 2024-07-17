@@ -16,7 +16,12 @@ import {
   initialBoard,
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
-import { loadGameState, saveGameState } from "../utils/localStorage";
+import {
+  clearGameState,
+  loadGameState,
+  saveGameState,
+} from "../utils/localStorage";
+import { useNavigate } from "react-router-dom";
 
 const initialNotes = Array.from({ length: 9 }, () => Array(9).fill([]));
 
@@ -24,14 +29,15 @@ export const GameBoard = () => {
   const [board, setBoard] = useState<string[][]>(initialBoard);
   const [notes, setNotes] = useState<string[][][]>(initialNotes);
   const [noteMode, setNoteMode] = useState(false);
+  const navigate = useNavigate();
   const [focusedCell, setFocusedCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
   const [incorrectGuesses, setIncorrectGuesses] = useState(0);
-  const [gameStatus, setGameStatus] = useState<"ongoing" | "win" | "lose">(
-    "ongoing"
-  );
+  const [gameStatus, setGameStatus] = useState<
+    "ongoing" | "win" | "lose" | "nogame"
+  >("ongoing");
   const [mistake, setMistake] = useState<{ row: number; col: number } | null>(
     null
   );
@@ -143,11 +149,17 @@ export const GameBoard = () => {
     return true;
   };
 
-  const handleCloseEndGameDialog = () => {
+  const handleNewGame = () => {
     setGameStatus("ongoing");
     setIncorrectGuesses(0);
     setMistake(null);
     generatePuzzle();
+  };
+
+  const handleBackToHome = () => {
+    clearGameState();
+    setGameStatus("nogame");
+    navigate("/");
   };
 
   const handleNoteModeToggle = (value: boolean) => {
@@ -214,21 +226,45 @@ export const GameBoard = () => {
         )}
       </Container>
 
-      <Modal show={gameStatus !== "ongoing"} onHide={handleCloseEndGameDialog}>
-        <Modal.Header closeButton>
-          <Modal.Title>
+      <Modal
+        centered
+        show={gameStatus !== "ongoing"}
+        style={{ background: darkMode ? "black" : "white" }}
+      >
+        <Modal.Header
+          style={{
+            backgroundColor: darkMode ? "gray" : "white",
+          }}
+        >
+          <Modal.Title
+            style={{
+              color: darkMode ? "white" : "black",
+            }}
+          >
             {gameStatus === "win" ? "You Win!" : "Game Over"}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            backgroundColor: darkMode ? "gray" : "white",
+            color: darkMode ? "white" : "black",
+          }}
+        >
           <p>
             {gameStatus === "win"
               ? "Congratulations! You have completed the Sudoku puzzle."
               : "You have made 3 incorrect guesses. Better luck next time!"}
           </p>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleCloseEndGameDialog}>
+        <Modal.Footer
+          style={{
+            backgroundColor: darkMode ? "gray" : "white",
+          }}
+        >
+          <Button variant="secondary" onClick={handleBackToHome}>
+            Back to the Home Screen
+          </Button>
+          <Button variant="danger" onClick={handleNewGame}>
             Start New Game
           </Button>
         </Modal.Footer>
