@@ -44,6 +44,7 @@ export const GameBoard = () => {
     if (savedState) {
       setBoard(savedState.board || initialBoard);
       setNotes(savedState.notes || initialNotes);
+      setIncorrectGuesses(savedState.incorrectGuesses || 0);
     } else {
       generatePuzzle();
     }
@@ -53,7 +54,7 @@ export const GameBoard = () => {
     const solvedBoard = generateSolvedBoard();
     const puzzle = createPuzzle(solvedBoard, 30);
     setBoard(puzzle);
-    saveGameState(puzzle, initialNotes);
+    saveGameState(puzzle, initialNotes, 0); // Initialize with 0 mistakes
   };
 
   const handleInputChange = (row: number, col: number, value: string) => {
@@ -72,7 +73,7 @@ export const GameBoard = () => {
           );
         }
         setNotes(newNotes);
-        saveGameState(newBoard, newNotes);
+        saveGameState(newBoard, newNotes, incorrectGuesses);
       } else {
         if (value === "" || isValidMove(board, row, col, value)) {
           newBoard[row][col] = value;
@@ -102,7 +103,7 @@ export const GameBoard = () => {
 
           setBoard(newBoard);
           setNotes(newNotes);
-          saveGameState(newBoard, newNotes);
+          saveGameState(newBoard, newNotes, incorrectGuesses);
           checkWinCondition(newBoard);
           setMistake(null);
         } else {
@@ -114,6 +115,7 @@ export const GameBoard = () => {
           if (incorrectGuesses + 1 >= 3) {
             setGameStatus("lose");
           }
+          saveGameState(newBoard, newNotes, incorrectGuesses + 1);
         }
       }
     }

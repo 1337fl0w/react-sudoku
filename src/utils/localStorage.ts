@@ -1,9 +1,17 @@
-const saveGameState = (board: string[][], notes: string[][][]) => {
-  const gameState = { board, notes };
+const saveGameState = (
+  board: string[][],
+  notes: string[][][],
+  incorrectGuesses: number
+) => {
+  const gameState = { board, notes, incorrectGuesses };
   localStorage.setItem("sudoku-game-state", JSON.stringify(gameState));
 };
 
-const loadGameState = (): { board: string[][]; notes: string[][][] } | null => {
+const loadGameState = (): {
+  board: string[][];
+  notes: string[][][];
+  incorrectGuesses: number;
+} | null => {
   const savedState = localStorage.getItem("sudoku-game-state");
   return savedState ? JSON.parse(savedState) : null;
 };
