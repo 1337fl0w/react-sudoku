@@ -16,6 +16,7 @@ import {
   initialBoard,
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
+import NumericKeypad from "./NumericKeypad";
 import {
   clearGameState,
   loadGameState,
@@ -132,11 +133,6 @@ export const GameBoard = () => {
     setHighlightedNote(board[row][col]);
   };
 
-  const handleBlur = () => {
-    setFocusedCell(null);
-    setHighlightedNote(null);
-  };
-
   const checkWinCondition = (board: string[][]) => {
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
@@ -164,6 +160,12 @@ export const GameBoard = () => {
 
   const handleNoteModeToggle = (value: boolean) => {
     setNoteMode(value);
+  };
+
+  const handleNumberClick = (value: string) => {
+    if (focusedCell) {
+      handleInputChange(focusedCell.row, focusedCell.col, value);
+    }
   };
 
   return (
@@ -218,12 +220,16 @@ export const GameBoard = () => {
               mistake={mistake}
               darkMode={darkMode}
               handleFocus={handleFocus}
-              handleBlur={handleBlur}
+              handleBlur={() => {}}
               handleInputChange={handleInputChange}
               highlightedNote={highlightedNote}
             />
           ))
         )}
+      </Container>
+
+      <Container className="mt-3" style={{ maxWidth: "500px", margin: "auto" }}>
+        <NumericKeypad onNumberClick={handleNumberClick} />
       </Container>
 
       <Modal
