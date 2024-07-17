@@ -1,74 +1,104 @@
 import { useState, useEffect } from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemButton,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import { Navbar, Nav, Container, Offcanvas } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { isGameSaved } from "../utils/localStorage";
+import { useTheme } from "../theme/ThemeContext";
 
 const AppBarComponent = () => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [show, setShow] = useState(false);
   const [gameSaved, setGameSaved] = useState(false);
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
 
   useEffect(() => {
     setGameSaved(isGameSaved());
   }, [localStorage.getItem("sudoku-game-state")]);
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    setDrawerOpen(false);
+    handleClose();
   };
 
   return (
     <>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={handleDrawerToggle}
+      <Navbar
+        bg="transparent"
+        expand={false}
+        style={{ backgroundColor: "transparent" }}
+      >
+        <Container
+          fluid
+          className="d-flex justify-content-center align-items-center"
+        >
+          <Navbar.Brand
+            className="mx-auto"
+            onClick={handleShow}
+            style={{
+              color: darkMode ? "white" : "black",
+              cursor: "pointer",
+              width: "100%",
+              textAlign: "center",
+              fontSize: "1.5rem",
+            }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6">Sudoku Game</Typography>
-        </Toolbar>
-      </AppBar>
-      <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
-        <List>
-          <ListItem>
-            <ListItemButton onClick={() => handleNavigation("/")}>
-              <ListItemText primary="Home" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton
-              onClick={() => handleNavigation("/gameview")}
-              disabled={!gameSaved}
+            Sudoku Game
+          </Navbar.Brand>
+        </Container>
+        <Navbar.Offcanvas
+          id="offcanvasNavbar"
+          aria-labelledby="offcanvasNavbarLabel"
+          placement="start"
+          show={show}
+          onHide={handleClose}
+          style={{ textAlign: "center" }}
+        >
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title
+              id="offcanvasNavbarLabel"
+              style={{
+                width: "100%",
+                textAlign: "center",
+                fontSize: "1.5rem",
+              }}
             >
-              <ListItemText primary="Game View" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton onClick={() => handleNavigation("/settings")}>
-              <ListItemText primary="Settings" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
+              Menu
+            </Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body
+            className="d-flex flex-column justify-content-start align-items-center"
+            style={{ paddingTop: "10rem" }}
+          >
+            <Nav className="flex-column">
+              <Nav.Link
+                onClick={() => handleNavigation("/")}
+                style={{ fontSize: "1.25rem", marginBottom: "1rem" }}
+              >
+                Home
+              </Nav.Link>
+              <Nav.Link
+                onClick={() => handleNavigation("/gameview")}
+                disabled={!gameSaved}
+                style={{
+                  fontSize: "1.25rem",
+                  marginBottom: "1rem",
+                  color: gameSaved ? "black" : "lightgrey",
+                }}
+              >
+                Continue Game
+              </Nav.Link>
+              <Nav.Link
+                onClick={() => handleNavigation("/settings")}
+                style={{ fontSize: "1.25rem", marginBottom: "1rem" }}
+              >
+                Settings
+              </Nav.Link>
+            </Nav>
+          </Offcanvas.Body>
+        </Navbar.Offcanvas>
+      </Navbar>
     </>
   );
 };
