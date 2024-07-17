@@ -43,7 +43,8 @@ export const GameBoard = () => {
   useEffect(() => {
     const savedState = loadGameState();
     if (savedState) {
-      setBoard(savedState);
+      setBoard(savedState.board || initialBoard);
+      setNotes(savedState.notes || initialNotes);
     } else {
       generatePuzzle();
     }
@@ -53,16 +54,18 @@ export const GameBoard = () => {
     const solvedBoard = generateSolvedBoard();
     const puzzle = createPuzzle(solvedBoard, 30);
     setBoard(puzzle);
-    saveGameState(puzzle);
+    saveGameState(puzzle, initialNotes);
   };
 
   const handleInputChange = (row: number, col: number, value: string) => {
     if (gameStatus !== "ongoing") return;
-    const newBoard = [...board];
-    const newNotes = [...notes];
+    const newBoard = board.map((row) => [...row]);
+    const newNotes = notes.map((row) => row.map((cell) => [...cell]));
     if (/^[1-9]?$/.test(value)) {
       if (noteMode) {
-        if (!newNotes[row][col].includes(value)) {
+        if (value === "") {
+          newNotes[row][col] = [];
+        } else if (!newNotes[row][col].includes(value)) {
           newNotes[row][col] = [...newNotes[row][col], value];
         } else {
           newNotes[row][col] = newNotes[row][col].filter(
@@ -70,11 +73,14 @@ export const GameBoard = () => {
           );
         }
         setNotes(newNotes);
+        saveGameState(newBoard, newNotes); // Save notes to local storage
       } else {
         if (value === "" || isValidMove(board, row, col, value)) {
           newBoard[row][col] = value;
+          newNotes[row][col] = []; // Clear notes when correct number is placed
           setBoard(newBoard);
-          saveGameState(newBoard);
+          setNotes(newNotes);
+          saveGameState(newBoard, newNotes);
           checkWinCondition(newBoard);
           setMistake(null);
         } else {
@@ -134,7 +140,6 @@ export const GameBoard = () => {
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(9, 1fr)",
-          gap: 0,
           maxWidth: "500px",
           maxHeight: "500px",
           margin: "auto",
