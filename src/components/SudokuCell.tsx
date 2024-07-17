@@ -12,6 +12,7 @@ interface SudokuCellProps {
   handleFocus: (row: number, col: number) => void;
   handleBlur: () => void;
   handleInputChange: (row: number, col: number, value: string) => void;
+  highlightedNote: string | null;
 }
 
 const SudokuCell: React.FC<SudokuCellProps> = ({
@@ -26,6 +27,7 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   handleFocus,
   handleBlur,
   handleInputChange,
+  highlightedNote,
 }) => {
   const isTopEdge = rowIndex % 3 === 0;
   const isBottomEdge = rowIndex % 3 === 2;
@@ -41,6 +43,8 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
 
   const isMistake =
     mistake && mistake.row === rowIndex && mistake.col === colIndex;
+
+  const highlightColor = darkMode ? "yellow" : "purple";
 
   return (
     <Box
@@ -123,7 +127,14 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
               alignItems: "center",
               justifyContent: "center",
               fontSize: "0.8rem",
-              color: noteMode ? (darkMode ? "white" : "black") : "lightgrey",
+              color:
+                highlightedNote === (noteIndex + 1).toString()
+                  ? highlightColor
+                  : noteMode
+                  ? darkMode
+                    ? "white"
+                    : "black"
+                  : "lightgrey",
             }}
           >
             {notes.includes((noteIndex + 1).toString()) ? noteIndex + 1 : ""}

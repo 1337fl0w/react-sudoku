@@ -37,6 +37,7 @@ export const GameBoard = () => {
   const [mistake, setMistake] = useState<{ row: number; col: number } | null>(
     null
   );
+  const [highlightedNote, setHighlightedNote] = useState<string | null>(null);
 
   const { darkMode } = useTheme();
 
@@ -123,10 +124,12 @@ export const GameBoard = () => {
 
   const handleFocus = (row: number, col: number) => {
     setFocusedCell({ row, col });
+    setHighlightedNote(board[row][col]);
   };
 
   const handleBlur = () => {
     setFocusedCell(null);
+    setHighlightedNote(null);
   };
 
   const checkWinCondition = (board: string[][]) => {
@@ -184,6 +187,7 @@ export const GameBoard = () => {
               handleFocus={handleFocus}
               handleBlur={handleBlur}
               handleInputChange={handleInputChange}
+              highlightedNote={highlightedNote}
             />
           ))
         )}
