@@ -1,12 +1,28 @@
-export const saveGameState = (board: string[][]) => {
-  localStorage.setItem("sudokuGameState", JSON.stringify(board));
+const saveGameState = (
+  board: string[][],
+  notes: string[][][],
+  incorrectGuesses: number
+) => {
+  const gameState = { board, notes, incorrectGuesses };
+  localStorage.setItem("sudoku-game-state", JSON.stringify(gameState));
 };
 
-export const loadGameState = (): string[][] | null => {
-  const savedState = localStorage.getItem("sudokuGameState");
+const loadGameState = (): {
+  board: string[][];
+  notes: string[][][];
+  incorrectGuesses: number;
+} | null => {
+  const savedState = localStorage.getItem("sudoku-game-state");
   return savedState ? JSON.parse(savedState) : null;
 };
 
-export const clearGameState = () => {
-  localStorage.removeItem("sudokuGameState");
+const clearGameState = () => {
+  localStorage.removeItem("sudoku-game-state");
 };
+
+const isGameSaved = (): boolean => {
+  const savedState = localStorage.getItem("sudoku-game-state");
+  return savedState !== null;
+};
+
+export { saveGameState, loadGameState, clearGameState, isGameSaved };

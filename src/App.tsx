@@ -7,15 +7,9 @@ import {
 } from "@mui/material";
 import { ThemeProvider, useTheme } from "./theme/ThemeContext"; // Import the ThemeProvider and custom hook
 import GameRouter from "./GameRouter";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const App = () => {
-  // TODO
-  /* 
-  # Fail condition
-  # Win condition
-  # Timer
-  # Point system
-  */
   return (
     <ThemeProvider>
       <AppWithTheme />

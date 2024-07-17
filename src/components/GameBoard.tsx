@@ -1,44 +1,57 @@
 import { useState, useEffect } from "react";
 import {
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Container,
   Button,
-} from "@mui/material";
+  Modal,
+  ToggleButtonGroup,
+  ToggleButton,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { useTheme } from "../theme/ThemeContext";
-import { saveGameState, loadGameState } from "../models/utils";
 import {
   generateSolvedBoard,
   createPuzzle,
   isValidMove,
+  initialBoard,
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
-import MistakesCounter from "./MistakesCounter";
+import NumericKeypad from "./NumericKeypad";
+import {
+  clearGameState,
+  loadGameState,
+  saveGameState,
+} from "../utils/localStorage";
+import { useNavigate } from "react-router-dom";
 
-const initialBoard = Array.from({ length: 9 }, () => Array(9).fill(""));
+const initialNotes = Array.from({ length: 9 }, () => Array(9).fill([]));
 
 export const GameBoard = () => {
   const [board, setBoard] = useState<string[][]>(initialBoard);
+  const [notes, setNotes] = useState<string[][][]>(initialNotes);
+  const [noteMode, setNoteMode] = useState(false);
+  const navigate = useNavigate();
   const [focusedCell, setFocusedCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
   const [incorrectGuesses, setIncorrectGuesses] = useState(0);
-  const [gameStatus, setGameStatus] = useState<"ongoing" | "win" | "lose">(
-    "ongoing"
-  );
+  const [gameStatus, setGameStatus] = useState<
+    "ongoing" | "win" | "lose" | "nogame"
+  >("ongoing");
   const [mistake, setMistake] = useState<{ row: number; col: number } | null>(
     null
   );
+  const [highlightedNote, setHighlightedNote] = useState<string | null>(null);
 
   const { darkMode } = useTheme();
 
   useEffect(() => {
     const savedState = loadGameState();
     if (savedState) {
-      setBoard(savedState);
+      setBoard(savedState.board || initialBoard);
+      setNotes(savedState.notes || initialNotes);
+      setIncorrectGuesses(savedState.incorrectGuesses || 0);
     } else {
       generatePuzzle();
     }
@@ -48,27 +61,68 @@ export const GameBoard = () => {
     const solvedBoard = generateSolvedBoard();
     const puzzle = createPuzzle(solvedBoard, 30);
     setBoard(puzzle);
-    saveGameState(puzzle);
+    saveGameState(puzzle, initialNotes, 0); // Initialize with 0 mistakes
   };
 
   const handleInputChange = (row: number, col: number, value: string) => {
     if (gameStatus !== "ongoing") return;
-    const newBoard = [...board];
+    const newBoard = board.map((row) => [...row]);
+    const newNotes = notes.map((row) => row.map((cell) => [...cell]));
     if (/^[1-9]?$/.test(value)) {
-      if (value === "" || isValidMove(board, row, col, value)) {
-        newBoard[row][col] = value;
-        setBoard(newBoard);
-        saveGameState(newBoard);
-        checkWinCondition(newBoard);
-        setMistake(null);
+      if (noteMode) {
+        if (value === "") {
+          newNotes[row][col] = [];
+        } else if (!newNotes[row][col].includes(value)) {
+          newNotes[row][col] = [...newNotes[row][col], value];
+        } else {
+          newNotes[row][col] = newNotes[row][col].filter(
+            (note) => note !== value
+          );
+        }
+        setNotes(newNotes);
+        saveGameState(newBoard, newNotes, incorrectGuesses);
       } else {
-        setIncorrectGuesses((prev) => prev + 1);
-        setMistake({ row, col });
-        setTimeout(() => {
+        if (value === "" || isValidMove(board, row, col, value)) {
+          newBoard[row][col] = value;
+          newNotes[row][col] = [];
+
+          for (let i = 0; i < 9; i++) {
+            if (i !== col)
+              newNotes[row][i] = newNotes[row][i].filter(
+                (note) => note !== value
+              );
+            if (i !== row)
+              newNotes[i][col] = newNotes[i][col].filter(
+                (note) => note !== value
+              );
+          }
+          const startRow = Math.floor(row / 3) * 3;
+          const startCol = Math.floor(col / 3) * 3;
+          for (let i = startRow; i < startRow + 3; i++) {
+            for (let j = startCol; j < startCol + 3; j++) {
+              if (i !== row && j !== col) {
+                newNotes[i][j] = newNotes[i][j].filter(
+                  (note) => note !== value
+                );
+              }
+            }
+          }
+
+          setBoard(newBoard);
+          setNotes(newNotes);
+          saveGameState(newBoard, newNotes, incorrectGuesses);
+          checkWinCondition(newBoard);
           setMistake(null);
-        }, 500); // Reset mistake after 500ms
-        if (incorrectGuesses + 1 >= 3) {
-          setGameStatus("lose");
+        } else {
+          setIncorrectGuesses((prev) => prev + 1);
+          setMistake({ row, col });
+          setTimeout(() => {
+            setMistake(null);
+          }, 500);
+          if (incorrectGuesses + 1 >= 3) {
+            setGameStatus("lose");
+          }
+          saveGameState(newBoard, newNotes, incorrectGuesses + 1);
         }
       }
     }
@@ -76,10 +130,7 @@ export const GameBoard = () => {
 
   const handleFocus = (row: number, col: number) => {
     setFocusedCell({ row, col });
-  };
-
-  const handleBlur = () => {
-    setFocusedCell(null);
+    setHighlightedNote(board[row][col]);
   };
 
   const checkWinCondition = (board: string[][]) => {
@@ -94,21 +145,67 @@ export const GameBoard = () => {
     return true;
   };
 
-  const handleCloseEndGameDialog = () => {
+  const handleNewGame = () => {
     setGameStatus("ongoing");
     setIncorrectGuesses(0);
-    setMistake(null); // Clear mistake on new game
+    setMistake(null);
     generatePuzzle();
+  };
+
+  const handleBackToHome = () => {
+    clearGameState();
+    setGameStatus("nogame");
+    navigate("/");
+  };
+
+  const handleNoteModeToggle = (value: boolean) => {
+    setNoteMode(value);
+  };
+
+  const handleNumberClick = (value: string) => {
+    if (focusedCell) {
+      handleInputChange(focusedCell.row, focusedCell.col, value);
+    }
   };
 
   return (
     <>
-      <MistakesCounter mistakes={incorrectGuesses} />
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(9, 1fr)",
-        }}
+      <Container className="mb-3">
+        <Row className="align-items-center">
+          <Col xs="auto">
+            <p style={{ marginBottom: "0" }}>Notes</p>
+            <ToggleButtonGroup
+              type="radio"
+              name="noteMode"
+              value={noteMode ? 1 : 0}
+              onChange={(val) => handleNoteModeToggle(!!val)}
+            >
+              <ToggleButton
+                value={0}
+                variant="outline-primary"
+                id={"toggle-normal-mode"}
+              >
+                Off
+              </ToggleButton>
+              <ToggleButton
+                value={1}
+                variant="outline-secondary"
+                id={"toggle-note-mode"}
+              >
+                On
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Col>
+          <Col></Col>
+          <Col className="text-end">
+            <p style={{ marginBottom: "0" }}>Mistakes</p>
+            <p style={{ marginBottom: "0" }}>{incorrectGuesses} / 3</p>
+          </Col>
+        </Row>
+      </Container>
+      <Container
+        className="d-flex flex-wrap"
+        style={{ maxWidth: "500px", margin: "auto" }}
       >
         {board.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
@@ -117,35 +214,67 @@ export const GameBoard = () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               value={cell}
+              notes={notes[rowIndex][colIndex]}
+              noteMode={noteMode}
               focusedCell={focusedCell}
               mistake={mistake}
               darkMode={darkMode}
               handleFocus={handleFocus}
-              handleBlur={handleBlur}
+              handleBlur={() => {}}
               handleInputChange={handleInputChange}
+              highlightedNote={highlightedNote}
             />
           ))
         )}
-      </Box>
+      </Container>
 
-      <Dialog
-        open={gameStatus !== "ongoing"}
-        onClose={handleCloseEndGameDialog}
+      <Container className="mt-3" style={{ maxWidth: "500px", margin: "auto" }}>
+        <NumericKeypad onNumberClick={handleNumberClick} />
+      </Container>
+
+      <Modal
+        centered
+        show={gameStatus !== "ongoing"}
+        style={{ background: darkMode ? "black" : "white" }}
       >
-        <DialogTitle>
-          {gameStatus === "win" ? "You Win!" : "Game Over"}
-        </DialogTitle>
-        <DialogContent>
+        <Modal.Header
+          style={{
+            backgroundColor: darkMode ? "gray" : "white",
+          }}
+        >
+          <Modal.Title
+            style={{
+              color: darkMode ? "white" : "black",
+            }}
+          >
+            {gameStatus === "win" ? "You Win!" : "Game Over"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          style={{
+            backgroundColor: darkMode ? "gray" : "white",
+            color: darkMode ? "white" : "black",
+          }}
+        >
           <p>
             {gameStatus === "win"
               ? "Congratulations! You have completed the Sudoku puzzle."
               : "You have made 3 incorrect guesses. Better luck next time!"}
           </p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEndGameDialog}>Start New Game</Button>
-        </DialogActions>
-      </Dialog>
+        </Modal.Body>
+        <Modal.Footer
+          style={{
+            backgroundColor: darkMode ? "gray" : "white",
+          }}
+        >
+          <Button variant="secondary" onClick={handleBackToHome}>
+            Back to the Home Screen
+          </Button>
+          <Button variant="danger" onClick={handleNewGame}>
+            Start New Game
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

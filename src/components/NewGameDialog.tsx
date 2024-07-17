@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
+import { Modal, Button } from "react-bootstrap";
+import { useTheme } from "../theme/ThemeContext";
 
 interface NewGameDialogProps {
   open: boolean;
@@ -20,19 +15,52 @@ const NewGameDialog: React.FC<NewGameDialogProps> = ({
   onContinue,
   onStartNew,
 }) => {
+  const { darkMode } = useTheme();
+
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Ongoing Game Detected</DialogTitle>
-      <DialogContent>
+    <Modal
+      show={open}
+      onHide={onClose}
+      centered
+      style={{ background: darkMode ? "black" : "white" }}
+    >
+      <Modal.Header
+        closeButton
+        style={{
+          backgroundColor: darkMode ? "gray" : "white",
+        }}
+      >
+        <Modal.Title
+          style={{
+            color: darkMode ? "white" : "black",
+          }}
+        >
+          Ongoing Game Detected
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body
+        style={{
+          backgroundColor: darkMode ? "gray" : "white",
+          color: darkMode ? "white" : "black",
+        }}
+      >
         <p>
           You have an ongoing game. Do you want to continue or start a new game?
         </p>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onContinue}>Continue</Button>
-        <Button onClick={onStartNew}>Start New Game</Button>
-      </DialogActions>
-    </Dialog>
+      </Modal.Body>
+      <Modal.Footer
+        style={{
+          backgroundColor: darkMode ? "gray" : "white",
+        }}
+      >
+        <Button variant="secondary" onClick={onStartNew}>
+          Start New Game
+        </Button>
+        <Button variant="danger" onClick={onContinue}>
+          Continue
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 };
 

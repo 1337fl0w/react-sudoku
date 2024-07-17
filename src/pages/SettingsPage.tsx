@@ -1,10 +1,4 @@
-import {
-  Container,
-  Typography,
-  Button,
-  Switch,
-  FormControlLabel,
-} from "@mui/material";
+import { Container, Card, Form, Button } from "react-bootstrap";
 import { clearGameState } from "../utils/localStorage";
 import { useTheme } from "../theme/ThemeContext";
 
@@ -17,22 +11,47 @@ export const SettingsPage = () => {
   };
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: "2rem", textAlign: "center" }}>
-      <Typography variant="h4" gutterBottom>
-        Settings
-      </Typography>
-      <FormControlLabel
-        control={<Switch checked={darkMode} onChange={toggleDarkMode} />}
-        label="Dark Mode"
-      />
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={handleClearGameState}
-        style={{ marginTop: "1rem" }}
+    <Container className="mt-4">
+      <Card
+        className="mb-3 h-100"
+        style={{
+          backgroundColor: darkMode ? "GrayText" : "white",
+        }}
       >
-        Clear Game State
-      </Button>
+        <Card.Header
+          style={{
+            color: darkMode ? "white" : "black",
+          }}
+        >
+          Settings
+        </Card.Header>
+        <Card.Body>
+          <Form>
+            <Form.Group className="mb-3 d-flex justify-content-between align-items-center">
+              <Form.Label
+                style={{
+                  color: darkMode ? "white" : "black",
+                }}
+              >
+                Dark Mode
+              </Form.Label>
+              <Form.Check
+                type="switch"
+                id="dark-mode-switch"
+                checked={darkMode}
+                onChange={toggleDarkMode}
+              />
+            </Form.Group>
+            <Card.Footer>
+              <Form.Group className="text-center">
+                <Button variant="danger" onClick={handleClearGameState}>
+                  Clear Game State
+                </Button>
+              </Form.Group>
+            </Card.Footer>
+          </Form>
+        </Card.Body>
+      </Card>
     </Container>
   );
 };
