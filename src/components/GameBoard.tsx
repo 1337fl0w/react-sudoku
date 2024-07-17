@@ -78,6 +78,30 @@ export const GameBoard = () => {
         if (value === "" || isValidMove(board, row, col, value)) {
           newBoard[row][col] = value;
           newNotes[row][col] = []; // Clear notes when correct number is placed
+
+          // Remove the same value from notes in the same row, column, and subgrid
+          for (let i = 0; i < 9; i++) {
+            if (i !== col)
+              newNotes[row][i] = newNotes[row][i].filter(
+                (note) => note !== value
+              );
+            if (i !== row)
+              newNotes[i][col] = newNotes[i][col].filter(
+                (note) => note !== value
+              );
+          }
+          const startRow = Math.floor(row / 3) * 3;
+          const startCol = Math.floor(col / 3) * 3;
+          for (let i = startRow; i < startRow + 3; i++) {
+            for (let j = startCol; j < startCol + 3; j++) {
+              if (i !== row && j !== col) {
+                newNotes[i][j] = newNotes[i][j].filter(
+                  (note) => note !== value
+                );
+              }
+            }
+          }
+
           setBoard(newBoard);
           setNotes(newNotes);
           saveGameState(newBoard, newNotes);
