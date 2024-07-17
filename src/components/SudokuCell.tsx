@@ -89,7 +89,7 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
             textAlign: "center",
             padding: "10px",
             fontSize: "1.2rem",
-            color: darkMode ? "white" : "black",
+            color: noteMode ? "lightgrey" : darkMode ? "white" : "black",
           },
         }}
         value={value}
@@ -102,36 +102,34 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
           backgroundColor: "transparent",
         }}
       />
-      {noteMode && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gridTemplateRows: "repeat(3, 1fr)",
-            pointerEvents: "none",
-          }}
-        >
-          {Array.from({ length: 9 }).map((_, noteIndex) => (
-            <Box
-              key={noteIndex}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.8rem",
-                color: darkMode ? "white" : "black",
-              }}
-            >
-              {notes.includes((noteIndex + 1).toString()) ? noteIndex + 1 : ""}
-            </Box>
-          ))}
-        </Box>
-      )}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateRows: "repeat(3, 1fr)",
+          pointerEvents: "none",
+        }}
+      >
+        {Array.from({ length: 9 }).map((_, noteIndex) => (
+          <Box
+            key={noteIndex}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.8rem",
+              color: noteMode ? (darkMode ? "white" : "black") : "lightgrey",
+            }}
+          >
+            {notes.includes((noteIndex + 1).toString()) ? noteIndex + 1 : ""}
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };
