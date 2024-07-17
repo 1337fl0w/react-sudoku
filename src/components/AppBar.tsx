@@ -12,6 +12,7 @@ const AppBarComponent = () => {
 
   useEffect(() => {
     setGameSaved(isGameSaved());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStorage.getItem("sudoku-game-state")]);
 
   const handleClose = () => setShow(false);
@@ -41,10 +42,10 @@ const AppBarComponent = () => {
               cursor: "pointer",
               width: "100%",
               textAlign: "center",
-              fontSize: "1.5rem",
+              fontSize: "2rem",
             }}
           >
-            Sudoku Game
+            Sudoku
           </Navbar.Brand>
         </Container>
         <Navbar.Offcanvas
@@ -55,18 +56,7 @@ const AppBarComponent = () => {
           onHide={handleClose}
           style={{ textAlign: "center" }}
         >
-          <Offcanvas.Header closeButton>
-            <Offcanvas.Title
-              id="offcanvasNavbarLabel"
-              style={{
-                width: "100%",
-                textAlign: "center",
-                fontSize: "1.5rem",
-              }}
-            >
-              Menu
-            </Offcanvas.Title>
-          </Offcanvas.Header>
+          <Offcanvas.Header closeButton></Offcanvas.Header>
           <Offcanvas.Body
             className="d-flex flex-column justify-content-start align-items-center"
             style={{ paddingTop: "10rem" }}
