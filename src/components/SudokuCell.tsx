@@ -1,27 +1,33 @@
-import { TextField } from "@mui/material";
+import { TextField, Box } from "@mui/material";
 
 interface SudokuCellProps {
   rowIndex: number;
   colIndex: number;
   value: string;
+  notes: string[];
+  noteMode: boolean;
   focusedCell: { row: number; col: number } | null;
   mistake: { row: number; col: number } | null;
   darkMode: boolean;
   handleFocus: (row: number, col: number) => void;
   handleBlur: () => void;
   handleInputChange: (row: number, col: number, value: string) => void;
+  highlightedNote: string | null;
 }
 
 const SudokuCell: React.FC<SudokuCellProps> = ({
   rowIndex,
   colIndex,
   value,
+  notes,
+  noteMode,
   focusedCell,
   mistake,
   darkMode,
   handleFocus,
   handleBlur,
   handleInputChange,
+  highlightedNote,
 }) => {
   const isTopEdge = rowIndex % 3 === 0;
   const isBottomEdge = rowIndex % 3 === 2;
@@ -38,22 +44,12 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   const isMistake =
     mistake && mistake.row === rowIndex && mistake.col === colIndex;
 
+  const highlightColor = darkMode ? "yellow" : "purple";
+
   return (
-    <TextField
-      variant="standard"
-      inputProps={{
-        style: {
-          textAlign: "center",
-          padding: "10px",
-          fontSize: "1.2rem",
-          color: darkMode ? "white" : "black",
-        },
-      }}
-      value={value}
-      onFocus={() => handleFocus(rowIndex, colIndex)}
-      onBlur={handleBlur}
-      onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
+    <Box
       sx={{
+        position: "relative",
         backgroundColor: isMistake
           ? "red"
           : isHighlighted
@@ -83,8 +79,69 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
             ? "2px solid white"
             : "2px solid black"
           : "1px solid grey",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
-    />
+    >
+      <TextField
+        variant="standard"
+        inputProps={{
+          style: {
+            textAlign: "center",
+            padding: "10px",
+            fontSize: "1.2rem",
+            color: noteMode ? "lightgrey" : darkMode ? "white" : "black",
+          },
+        }}
+        value={value}
+        onFocus={() => handleFocus(rowIndex, colIndex)}
+        onBlur={handleBlur}
+        onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
+        sx={{
+          width: "100%",
+          height: "100%",
+          backgroundColor: "transparent",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateRows: "repeat(3, 1fr)",
+          pointerEvents: "none",
+        }}
+      >
+        {Array.from({ length: 9 }).map((_, noteIndex) => (
+          <Box
+            key={noteIndex}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.8rem",
+              color:
+                highlightedNote === (noteIndex + 1).toString()
+                  ? highlightColor
+                  : noteMode
+                  ? darkMode
+                    ? "white"
+                    : "black"
+                  : "lightgrey",
+            }}
+          >
+            {notes.includes((noteIndex + 1).toString()) ? noteIndex + 1 : ""}
+          </Box>
+        ))}
+      </Box>
+    </Box>
   );
 };
 
