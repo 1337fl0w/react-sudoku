@@ -18,7 +18,7 @@ export const GameView = () => {
   const handleStartNewGame = () => {
     setShowNewGameDialog(false);
     clearGameState();
-    window.location.reload(); // Reload the page to reset the game state
+    window.location.reload();
   };
 
   return (
