@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { Container, Button, Modal, Form } from "react-bootstrap";
+import {
+  Container,
+  Button,
+  Modal,
+  ToggleButtonGroup,
+  ToggleButton,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { useTheme } from "../theme/ThemeContext";
 import {
   generateSolvedBoard,
@@ -8,7 +16,6 @@ import {
   initialBoard,
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
-import MistakesCounter from "./MistakesCounter";
 import { loadGameState, saveGameState } from "../utils/localStorage";
 
 const initialNotes = Array.from({ length: 9 }, () => Array(9).fill([]));
@@ -141,22 +148,45 @@ export const GameBoard = () => {
     generatePuzzle();
   };
 
-  const handleNoteModeToggle = () => {
-    setNoteMode((prev) => !prev);
+  const handleNoteModeToggle = (value: boolean) => {
+    setNoteMode(value);
   };
 
   return (
     <>
-      <Form.Group className="text-center mb-3">
-        <Form.Check
-          type="switch"
-          id="note-mode-switch"
-          label="Note Mode"
-          checked={noteMode}
-          onChange={handleNoteModeToggle}
-        />
-      </Form.Group>
-      <MistakesCounter mistakes={incorrectGuesses} />
+      <Container className="mb-3">
+        <Row className="align-items-center">
+          <Col xs="auto">
+            <p style={{ marginBottom: "0" }}>Notes</p>
+            <ToggleButtonGroup
+              type="radio"
+              name="noteMode"
+              value={noteMode ? 1 : 0}
+              onChange={(val) => handleNoteModeToggle(!!val)}
+            >
+              <ToggleButton
+                value={0}
+                variant="outline-primary"
+                id={"toggle-normal-mode"}
+              >
+                Off
+              </ToggleButton>
+              <ToggleButton
+                value={1}
+                variant="outline-secondary"
+                id={"toggle-note-mode"}
+              >
+                On
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Col>
+          <Col></Col>
+          <Col className="text-end">
+            <p style={{ marginBottom: "0" }}>Mistakes</p>
+            <p style={{ marginBottom: "0" }}>{incorrectGuesses} / 3</p>
+          </Col>
+        </Row>
+      </Container>
       <Container
         className="d-flex flex-wrap"
         style={{ maxWidth: "500px", margin: "auto" }}
