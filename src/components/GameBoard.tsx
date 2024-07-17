@@ -10,7 +10,6 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { useTheme } from "../theme/ThemeContext";
-import { saveGameState, loadGameState } from "../models/utils";
 import {
   generateSolvedBoard,
   createPuzzle,
@@ -19,6 +18,7 @@ import {
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
 import MistakesCounter from "./MistakesCounter";
+import { loadGameState, saveGameState } from "../utils/localStorage";
 
 const initialNotes = Array.from({ length: 9 }, () => Array(9).fill([]));
 

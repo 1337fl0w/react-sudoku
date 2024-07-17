@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -12,10 +12,16 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
+import { isGameSaved } from "../utils/localStorage";
 
 const AppBarComponent = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [gameSaved, setGameSaved] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setGameSaved(isGameSaved());
+  }, [localStorage.getItem("sudoku-game-state")]);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -49,7 +55,10 @@ const AppBarComponent = () => {
             </ListItemButton>
           </ListItem>
           <ListItem>
-            <ListItemButton onClick={() => handleNavigation("/gameview")}>
+            <ListItemButton
+              onClick={() => handleNavigation("/gameview")}
+              disabled={!gameSaved}
+            >
               <ListItemText primary="Game View" />
             </ListItemButton>
           </ListItem>

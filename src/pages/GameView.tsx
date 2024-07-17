@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Container, Typography, Button } from "@mui/material";
 import { GameBoard } from "../components/GameBoard";
 import NewGameDialog from "../components/NewGameDialog";
-import { clearGameState } from "../models/utils";
+import { clearGameState } from "../utils/localStorage";
 
 export const GameView = () => {
   const [showNewGameDialog, setShowNewGameDialog] = useState(false);
