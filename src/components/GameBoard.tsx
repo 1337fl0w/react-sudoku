@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Typography,
 } from "@mui/material";
 import { useTheme } from "../theme/ThemeContext";
 import { saveGameState, loadGameState } from "../utils/localStorage";
@@ -85,6 +86,9 @@ export const GameBoard = () => {
   const [gameStatus, setGameStatus] = useState<"ongoing" | "win" | "lose">(
     "ongoing"
   );
+  const [mistake, setMistake] = useState<{ row: number; col: number } | null>(
+    null
+  );
 
   const { darkMode } = useTheme();
 
@@ -113,8 +117,13 @@ export const GameBoard = () => {
         setBoard(newBoard);
         saveGameState(newBoard);
         checkWinCondition(newBoard);
+        setMistake(null);
       } else {
         setIncorrectGuesses((prev) => prev + 1);
+        setMistake({ row, col });
+        setTimeout(() => {
+          setMistake(null);
+        }, 500); // Reset mistake after 500ms
         if (incorrectGuesses + 1 >= 3) {
           setGameStatus("lose");
         }
@@ -145,11 +154,15 @@ export const GameBoard = () => {
   const handleCloseEndGameDialog = () => {
     setGameStatus("ongoing");
     setIncorrectGuesses(0);
+    setMistake(null); // Clear mistake on new game
     generatePuzzle();
   };
 
   return (
     <>
+      <Typography variant="h6" sx={{ textAlign: "center", margin: "1rem 0" }}>
+        Mistakes: {incorrectGuesses} / 3
+      </Typography>
       <Box
         sx={{
           display: "grid",
@@ -171,6 +184,9 @@ export const GameBoard = () => {
                   Math.floor(focusedCell.col / 3) ===
                     Math.floor(colIndex / 3)));
 
+            const isMistake =
+              mistake && mistake.row === rowIndex && mistake.col === colIndex;
+
             return (
               <TextField
                 key={`${rowIndex}-${colIndex}`}
@@ -190,7 +206,9 @@ export const GameBoard = () => {
                   handleInputChange(rowIndex, colIndex, e.target.value)
                 }
                 sx={{
-                  backgroundColor: isHighlighted
+                  backgroundColor: isMistake
+                    ? "red"
+                    : isHighlighted
                     ? darkMode
                       ? "rgba(255, 255, 255, 0.2)"
                       : "rgba(0, 0, 0, 0.1)"
