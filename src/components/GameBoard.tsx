@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Switch,
-  FormControlLabel,
-} from "@mui/material";
+import { Container, Button, Modal, Form } from "react-bootstrap";
 import { useTheme } from "../theme/ThemeContext";
 import {
   generateSolvedBoard,
@@ -74,13 +65,12 @@ export const GameBoard = () => {
           );
         }
         setNotes(newNotes);
-        saveGameState(newBoard, newNotes); // Save notes to local storage
+        saveGameState(newBoard, newNotes);
       } else {
         if (value === "" || isValidMove(board, row, col, value)) {
           newBoard[row][col] = value;
-          newNotes[row][col] = []; // Clear notes when correct number is placed
+          newNotes[row][col] = [];
 
-          // Remove the same value from notes in the same row, column, and subgrid
           for (let i = 0; i < 9; i++) {
             if (i !== col)
               newNotes[row][i] = newNotes[row][i].filter(
@@ -113,7 +103,7 @@ export const GameBoard = () => {
           setMistake({ row, col });
           setTimeout(() => {
             setMistake(null);
-          }, 500); // Reset mistake after 500ms
+          }, 500);
           if (incorrectGuesses + 1 >= 3) {
             setGameStatus("lose");
           }
@@ -147,7 +137,7 @@ export const GameBoard = () => {
   const handleCloseEndGameDialog = () => {
     setGameStatus("ongoing");
     setIncorrectGuesses(0);
-    setMistake(null); // Clear mistake on new game
+    setMistake(null);
     generatePuzzle();
   };
 
@@ -157,20 +147,19 @@ export const GameBoard = () => {
 
   return (
     <>
-      <FormControlLabel
-        control={<Switch checked={noteMode} onChange={handleNoteModeToggle} />}
-        label="Note Mode"
-        sx={{ display: "block", textAlign: "center", marginBottom: "1rem" }}
-      />
+      <Form.Group className="text-center mb-3">
+        <Form.Check
+          type="switch"
+          id="note-mode-switch"
+          label="Note Mode"
+          checked={noteMode}
+          onChange={handleNoteModeToggle}
+        />
+      </Form.Group>
       <MistakesCounter mistakes={incorrectGuesses} />
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(9, 1fr)",
-          maxWidth: "500px",
-          maxHeight: "500px",
-          margin: "auto",
-        }}
+      <Container
+        className="d-flex flex-wrap"
+        style={{ maxWidth: "500px", margin: "auto" }}
       >
         {board.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
@@ -191,26 +180,27 @@ export const GameBoard = () => {
             />
           ))
         )}
-      </Box>
+      </Container>
 
-      <Dialog
-        open={gameStatus !== "ongoing"}
-        onClose={handleCloseEndGameDialog}
-      >
-        <DialogTitle>
-          {gameStatus === "win" ? "You Win!" : "Game Over"}
-        </DialogTitle>
-        <DialogContent>
+      <Modal show={gameStatus !== "ongoing"} onHide={handleCloseEndGameDialog}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {gameStatus === "win" ? "You Win!" : "Game Over"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <p>
             {gameStatus === "win"
               ? "Congratulations! You have completed the Sudoku puzzle."
               : "You have made 3 incorrect guesses. Better luck next time!"}
           </p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEndGameDialog}>Start New Game</Button>
-        </DialogActions>
-      </Dialog>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseEndGameDialog}>
+            Start New Game
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

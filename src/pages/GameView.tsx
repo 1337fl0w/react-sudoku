@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Container, Typography, Button } from "@mui/material";
+import { Container, Button, Modal } from "react-bootstrap";
 import { GameBoard } from "../components/GameBoard";
-import NewGameDialog from "../components/NewGameDialog";
 import { clearGameState } from "../utils/localStorage";
 
 export const GameView = () => {
@@ -22,25 +21,30 @@ export const GameView = () => {
   };
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: "2rem", textAlign: "center" }}>
-      <Typography variant="h4" gutterBottom>
-        Sudoku Game
-      </Typography>
+    <Container className="mt-4 text-center">
       <GameBoard />
-      <Button
-        variant="contained"
-        color="primary"
-        style={{ marginTop: "1rem" }}
-        onClick={handleNewGame}
-      >
+      <Button variant="primary" className="mt-3" onClick={handleNewGame}>
         New Game
       </Button>
-      <NewGameDialog
-        open={showNewGameDialog}
-        onClose={() => setShowNewGameDialog(false)}
-        onContinue={handleContinueGame}
-        onStartNew={handleStartNewGame}
-      />
+      <Modal
+        show={showNewGameDialog}
+        onHide={() => setShowNewGameDialog(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Start New Game</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Do you want to start a new game or continue the existing game?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleContinueGame}>
+            Continue
+          </Button>
+          <Button variant="danger" onClick={handleStartNewGame}>
+            Start New
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
