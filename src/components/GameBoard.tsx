@@ -1,80 +1,23 @@
 import { useState, useEffect } from "react";
 import {
-  TextField,
   Box,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
-  Typography,
 } from "@mui/material";
 import { useTheme } from "../theme/ThemeContext";
-import { saveGameState, loadGameState } from "../utils/localStorage";
+import { saveGameState, loadGameState } from "../models/utils";
+import {
+  generateSolvedBoard,
+  createPuzzle,
+  isValidMove,
+} from "../models/Board";
+import SudokuCell from "./SudokuCell";
+import MistakesCounter from "./MistakesCounter";
 
 const initialBoard = Array.from({ length: 9 }, () => Array(9).fill(""));
-
-const isValidMove = (
-  board: string[][],
-  row: number,
-  col: number,
-  value: string
-) => {
-  if (board[row].includes(value)) return false;
-  for (let i = 0; i < 9; i++) {
-    if (board[i][col] === value) return false;
-  }
-  const startRow = Math.floor(row / 3) * 3;
-  const startCol = Math.floor(col / 3) * 3;
-  for (let i = startRow; i < startRow + 3; i++) {
-    for (let j = startCol; j < startCol + 3; j++) {
-      if (board[i][j] === value) return false;
-    }
-  }
-  return true;
-};
-
-const generateSolvedBoard = () => {
-  const board = Array.from({ length: 9 }, () => Array(9).fill(""));
-  const fillBoard = (board: string[][]): boolean => {
-    const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        if (board[row][col] === "") {
-          nums.sort(() => Math.random() - 0.5);
-          for (const num of nums) {
-            const value = num.toString();
-            if (isValidMove(board, row, col, value)) {
-              board[row][col] = value;
-              if (fillBoard(board)) {
-                return true;
-              }
-              board[row][col] = "";
-            }
-          }
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-  fillBoard(board);
-  return board;
-};
-
-const createPuzzle = (solvedBoard: string[][], clues: number) => {
-  const puzzle = solvedBoard.map((row) => row.slice());
-  let attempts = 81 - clues;
-  while (attempts > 0) {
-    const row = Math.floor(Math.random() * 9);
-    const col = Math.floor(Math.random() * 9);
-    if (puzzle[row][col] !== "") {
-      puzzle[row][col] = "";
-      attempts--;
-    }
-  }
-  return puzzle;
-};
 
 export const GameBoard = () => {
   const [board, setBoard] = useState<string[][]>(initialBoard);
@@ -160,9 +103,7 @@ export const GameBoard = () => {
 
   return (
     <>
-      <Typography variant="h6" sx={{ textAlign: "center", margin: "1rem 0" }}>
-        Mistakes: {incorrectGuesses} / 3
-      </Typography>
+      <MistakesCounter mistakes={incorrectGuesses} />
       <Box
         sx={{
           display: "grid",
@@ -170,75 +111,20 @@ export const GameBoard = () => {
         }}
       >
         {board.map((row, rowIndex) =>
-          row.map((cell, colIndex) => {
-            const isTopEdge = rowIndex % 3 === 0;
-            const isBottomEdge = rowIndex % 3 === 2;
-            const isLeftEdge = colIndex % 3 === 0;
-            const isRightEdge = colIndex % 3 === 2;
-
-            const isHighlighted =
-              focusedCell &&
-              (focusedCell.row === rowIndex ||
-                focusedCell.col === colIndex ||
-                (Math.floor(focusedCell.row / 3) === Math.floor(rowIndex / 3) &&
-                  Math.floor(focusedCell.col / 3) ===
-                    Math.floor(colIndex / 3)));
-
-            const isMistake =
-              mistake && mistake.row === rowIndex && mistake.col === colIndex;
-
-            return (
-              <TextField
-                key={`${rowIndex}-${colIndex}`}
-                variant="standard"
-                inputProps={{
-                  style: {
-                    textAlign: "center",
-                    padding: "10px",
-                    fontSize: "1.2rem",
-                    color: darkMode ? "white" : "black",
-                  },
-                }}
-                value={cell}
-                onFocus={() => handleFocus(rowIndex, colIndex)}
-                onBlur={handleBlur}
-                onChange={(e) =>
-                  handleInputChange(rowIndex, colIndex, e.target.value)
-                }
-                sx={{
-                  backgroundColor: isMistake
-                    ? "red"
-                    : isHighlighted
-                    ? darkMode
-                      ? "rgba(255, 255, 255, 0.2)"
-                      : "rgba(0, 0, 0, 0.1)"
-                    : darkMode
-                    ? "#333"
-                    : "white",
-                  borderTop: isTopEdge
-                    ? darkMode
-                      ? "2px solid white"
-                      : "2px solid black"
-                    : "1px solid grey",
-                  borderBottom: isBottomEdge
-                    ? darkMode
-                      ? "2px solid white"
-                      : "2px solid black"
-                    : "1px solid grey",
-                  borderLeft: isLeftEdge
-                    ? darkMode
-                      ? "2px solid white"
-                      : "2px solid black"
-                    : "1px solid grey",
-                  borderRight: isRightEdge
-                    ? darkMode
-                      ? "2px solid white"
-                      : "2px solid black"
-                    : "1px solid grey",
-                }}
-              />
-            );
-          })
+          row.map((cell, colIndex) => (
+            <SudokuCell
+              key={`${rowIndex}-${colIndex}`}
+              rowIndex={rowIndex}
+              colIndex={colIndex}
+              value={cell}
+              focusedCell={focusedCell}
+              mistake={mistake}
+              darkMode={darkMode}
+              handleFocus={handleFocus}
+              handleBlur={handleBlur}
+              handleInputChange={handleInputChange}
+            />
+          ))
         )}
       </Box>
 
