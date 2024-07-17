@@ -19,6 +19,10 @@ const GameRouter = () => {
     }
   };
 
+  const handleContinueGameClick = () => {
+    navigate("/gameview");
+  };
+
   const handleContinueGame = () => {
     setShowPrompt(false);
     navigate("/gameview");
@@ -35,7 +39,12 @@ const GameRouter = () => {
       <Routes>
         <Route
           path="/"
-          element={<HomePage onNewGameClick={handleNewGameClick} />}
+          element={
+            <HomePage
+              onNewGameClick={handleNewGameClick}
+              onContinueGameClick={handleContinueGameClick}
+            />
+          }
         />
         <Route path="/gameview" element={<GameView />} />
         <Route path="/settings" element={<SettingsPage />} />

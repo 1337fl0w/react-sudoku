@@ -1,24 +1,32 @@
-import { Container, Typography, Button } from "@mui/material";
+import { Container, Button } from "react-bootstrap";
+import { isGameSaved } from "../utils/localStorage";
 
 interface HomePageProps {
   onNewGameClick: () => void;
+  onContinueGameClick: () => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNewGameClick }) => {
-  const handleStartGame = () => {
-    onNewGameClick();
-  };
+export const HomePage: React.FC<HomePageProps> = ({
+  onNewGameClick,
+  onContinueGameClick,
+}) => {
+  const gameSaved = isGameSaved();
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: "2rem", textAlign: "center" }}>
-      <Typography variant="h2" gutterBottom>
-        Welcome to Sudoku
-      </Typography>
-      <Typography variant="h5" paragraph>
-        Enjoy a challenging game of Sudoku. Click below to start playing!
-      </Typography>
-      <Button variant="contained" color="primary" onClick={handleStartGame}>
-        Start Game
+    <Container
+      className="d-flex flex-column justify-content-center position-relative"
+      style={{ height: "100vh" }}
+    >
+      <Button
+        variant="secondary"
+        onClick={onContinueGameClick}
+        disabled={!gameSaved}
+        className="mb-2 w-100"
+      >
+        Continue Game
+      </Button>
+      <Button variant="primary" onClick={onNewGameClick} className="w-100">
+        New Game
       </Button>
     </Container>
   );

@@ -1,4 +1,4 @@
-import { TextField, Box } from "@mui/material";
+import { Form, Container } from "react-bootstrap";
 
 interface SudokuCellProps {
   rowIndex: number;
@@ -47,8 +47,8 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   const highlightColor = darkMode ? "yellow" : "purple";
 
   return (
-    <Box
-      sx={{
+    <Container
+      style={{
         position: "relative",
         backgroundColor: isMistake
           ? "red"
@@ -79,54 +79,56 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
             ? "2px solid white"
             : "2px solid black"
           : "1px solid grey",
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        width: "11.11%",
+        paddingTop: "11.11%",
+        margin: 0,
+        overflow: "hidden",
       }}
     >
-      <TextField
-        variant="standard"
-        inputProps={{
-          style: {
-            textAlign: "center",
-            padding: "10px",
-            fontSize: "1.2rem",
-            color: noteMode ? "lightgrey" : darkMode ? "white" : "black",
-          },
-        }}
+      <Form.Control
+        type="text"
         value={value}
         onFocus={() => handleFocus(rowIndex, colIndex)}
         onBlur={handleBlur}
         onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
-        sx={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: "transparent",
-        }}
-      />
-      <Box
-        sx={{
+        style={{
+          textAlign: "center",
+          padding: "10px",
+          fontSize: "1.2rem",
+          color: noteMode ? "lightgrey" : darkMode ? "white" : "black",
           position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
           height: "100%",
+          backgroundColor: "transparent",
+          border: "none",
+          boxShadow: "none",
+        }}
+      />
+      <Container
+        style={{
+          position: "absolute",
+          top: 0,
+          left: -3,
+          width: "100%",
+          height: "100%",
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gridTemplateRows: "repeat(3, 1fr)",
+          gridColumnGap: "2px",
+          gridRowGap: "0.1px",
           pointerEvents: "none",
+          fontSize: "0.5rem",
         }}
       >
         {Array.from({ length: 9 }).map((_, noteIndex) => (
-          <Box
+          <div
             key={noteIndex}
-            sx={{
+            style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "0.8rem",
               color:
                 highlightedNote === (noteIndex + 1).toString()
                   ? highlightColor
@@ -138,10 +140,10 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
             }}
           >
             {notes.includes((noteIndex + 1).toString()) ? noteIndex + 1 : ""}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </Container>
+    </Container>
   );
 };
 
