@@ -63,7 +63,7 @@ const AppBarComponent = () => {
           >
             <Nav className="flex-column">
               <Nav.Link
-                onClick={() => handleNavigation("/")}
+                onClick={() => handleNavigation("/react-sudoku")}
                 style={{ fontSize: "1.25rem", marginBottom: "1rem" }}
               >
                 Home

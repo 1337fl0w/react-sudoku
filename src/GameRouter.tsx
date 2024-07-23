@@ -38,7 +38,7 @@ const GameRouter = () => {
     <>
       <Routes>
         <Route
-          path="/"
+          path="/react-sudoku"
           element={
             <HomePage
               onNewGameClick={handleNewGameClick}

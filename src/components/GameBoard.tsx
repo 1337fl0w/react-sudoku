@@ -17,6 +17,7 @@ import {
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
 import NumericKeypad from "./NumericKeypad";
+import Timer from "./Timer"; // Import the Timer component
 import {
   clearGameState,
   loadGameState,
@@ -25,6 +26,15 @@ import {
 import { useNavigate } from "react-router-dom";
 
 const initialNotes = Array.from({ length: 9 }, () => Array(9).fill([]));
+
+const getInitialElapsedTime = () => {
+  const savedState = localStorage.getItem("sudoku-game-state");
+  if (savedState) {
+    const parsedState = JSON.parse(savedState);
+    return parsedState.elapsedTime || 0;
+  }
+  return 0;
+};
 
 export const GameBoard = () => {
   const [board, setBoard] = useState<string[][]>(initialBoard);
@@ -43,6 +53,7 @@ export const GameBoard = () => {
     null
   );
   const [highlightedNote, setHighlightedNote] = useState<string | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(getInitialElapsedTime);
 
   const { darkMode } = useTheme();
 
@@ -52,6 +63,7 @@ export const GameBoard = () => {
       setBoard(savedState.board || initialBoard);
       setNotes(savedState.notes || initialNotes);
       setIncorrectGuesses(savedState.incorrectGuesses || 0);
+      setElapsedTime(savedState.elapsedTime || 0);
     } else {
       generatePuzzle();
     }
@@ -61,7 +73,7 @@ export const GameBoard = () => {
     const solvedBoard = generateSolvedBoard();
     const puzzle = createPuzzle(solvedBoard, 30);
     setBoard(puzzle);
-    saveGameState(puzzle, initialNotes, 0); // Initialize with 0 mistakes
+    saveGameState(puzzle, initialNotes, 0, 0); // Initialize with 0 mistakes and 0 elapsed time
   };
 
   const handleInputChange = (row: number, col: number, value: string) => {
@@ -80,7 +92,7 @@ export const GameBoard = () => {
           );
         }
         setNotes(newNotes);
-        saveGameState(newBoard, newNotes, incorrectGuesses);
+        saveGameState(newBoard, newNotes, incorrectGuesses, elapsedTime);
       } else {
         if (value === "" || isValidMove(board, row, col, value)) {
           newBoard[row][col] = value;
@@ -110,7 +122,7 @@ export const GameBoard = () => {
 
           setBoard(newBoard);
           setNotes(newNotes);
-          saveGameState(newBoard, newNotes, incorrectGuesses);
+          saveGameState(newBoard, newNotes, incorrectGuesses, elapsedTime);
           checkWinCondition(newBoard);
           setMistake(null);
         } else {
@@ -122,7 +134,7 @@ export const GameBoard = () => {
           if (incorrectGuesses + 1 >= 3) {
             setGameStatus("lose");
           }
-          saveGameState(newBoard, newNotes, incorrectGuesses + 1);
+          saveGameState(newBoard, newNotes, incorrectGuesses + 1, elapsedTime);
         }
       }
     }
@@ -149,13 +161,14 @@ export const GameBoard = () => {
     setGameStatus("ongoing");
     setIncorrectGuesses(0);
     setMistake(null);
+    setElapsedTime(0); // Reset the timer
     generatePuzzle();
   };
 
   const handleBackToHome = () => {
     clearGameState();
     setGameStatus("nogame");
-    navigate("/");
+    navigate("/react-sudoku");
   };
 
   const handleNoteModeToggle = (value: boolean) => {
@@ -165,6 +178,13 @@ export const GameBoard = () => {
   const handleNumberClick = (value: string) => {
     if (focusedCell) {
       handleInputChange(focusedCell.row, focusedCell.col, value);
+    }
+  };
+
+  const handleTimeUpdate = (time: number) => {
+    setElapsedTime(time);
+    if (gameStatus === "ongoing") {
+      saveGameState(board, notes, incorrectGuesses, time); // Save time update
     }
   };
 
@@ -191,12 +211,21 @@ export const GameBoard = () => {
                 value={1}
                 variant="outline-secondary"
                 id={"toggle-note-mode"}
+                style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }} // Adjust the size here
               >
                 On
               </ToggleButton>
             </ToggleButtonGroup>
           </Col>
-          <Col></Col>
+          <Col>
+            <Container className="d-flex justify-content-center mb-3">
+              <Timer
+                isActive={gameStatus === "ongoing"}
+                onTimeUpdate={handleTimeUpdate}
+                initialTime={elapsedTime} // Pass initialTime to Timer
+              />
+            </Container>
+          </Col>
           <Col className="text-end">
             <p style={{ marginBottom: "0" }}>Mistakes</p>
             <p style={{ marginBottom: "0" }}>{incorrectGuesses} / 3</p>
@@ -260,6 +289,10 @@ export const GameBoard = () => {
             {gameStatus === "win"
               ? "Congratulations! You have completed the Sudoku puzzle."
               : "You have made 3 incorrect guesses. Better luck next time!"}
+          </p>
+          <p>
+            Time Taken:{" "}
+            {new Date(elapsedTime * 1000).toISOString().substr(11, 8)}
           </p>
         </Modal.Body>
         <Modal.Footer
