@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SUDOKU</title>
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/react-sudoku/favicon.ico" />
+    <meta name="description" content="Description" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Title" />
+    <link rel="apple-touch-startup-image" href="/react-sudoku/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="/react-sudoku/apple-touch-icon.png" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* Disable scrolling */
+      }
+      .force-mobile-view {
+        max-width: 400px;
+        height: 100vh; /* Adjust to window height */
+        margin: 0 auto;
+        border: none; /* Remove white border */
+        box-shadow: none; /* Remove any shadow */
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script type="module" crossorigin src="/react-sudoku/assets/index-DomUnx07.js"></script>
+    <link rel="stylesheet" crossorigin href="/react-sudoku/assets/index-DjUDNoqk.css">
+  <link rel="manifest" href="/react-sudoku/manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+    <script>
+          document.body.classList.add('force-mobile-view');
+      applyMobileView();
+    </script>
+  </body>
+</html>
