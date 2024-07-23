@@ -12,9 +12,33 @@
     <meta name="apple-mobile-web-app-title" content="Title" />
     <link rel="apple-touch-startup-image" href="/apple-touch-icon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* Disable scrolling */
+      }
+      .force-mobile-view {
+        max-width: 400px;
+        height: 100vh; /* Adjust to window height */
+        margin: 0 auto;
+        border: none; /* Remove white border */
+        box-shadow: none; /* Remove any shadow */
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+          document.body.classList.add('force-mobile-view');
+      applyMobileView();
+    </script>
   </body>
 </html>
