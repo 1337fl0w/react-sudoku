@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SUDOKU</title>
     <meta name="theme-color" content="#000000" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="/react-sudoku/favicon.ico" />
     <meta name="description" content="Description" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Title" />
-    <link rel="apple-touch-startup-image" href="/apple-touch-icon.png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-startup-image" href="/react-sudoku/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="/react-sudoku/apple-touch-icon.png" />
     <style>
       html, body {
         margin: 0;
@@ -35,10 +35,19 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
+    <script type="module">
+      function isMobileDevice() {
+        return /Mobi|Android/i.test(navigator.userAgent);
+      }
+
+      function applyMobileView() {
+        if (!isMobileDevice()) {
           document.body.classList.add('force-mobile-view');
+        }
+      }
+
       applyMobileView();
     </script>
+    <script type="module" src="/react-sudoku/src/main.tsx"></script>
   </body>
 </html>
