@@ -69,7 +69,7 @@ const AppBarComponent = () => {
                 Home
               </Nav.Link>
               <Nav.Link
-                onClick={() => handleNavigation("/gameview")}
+                onClick={() => handleNavigation("/react-sudoku/gameview")}
                 disabled={!gameSaved}
                 style={{
                   fontSize: "1.25rem",
@@ -80,7 +80,7 @@ const AppBarComponent = () => {
                 Continue Game
               </Nav.Link>
               <Nav.Link
-                onClick={() => handleNavigation("/settings")}
+                onClick={() => handleNavigation("/react-sudoku/settings")}
                 style={{ fontSize: "1.25rem", marginBottom: "1rem" }}
               >
                 Settings

@@ -15,23 +15,23 @@ const GameRouter = () => {
     if (savedState) {
       setShowPrompt(true);
     } else {
-      navigate("/gameview");
+      navigate("/react-sudoku/gameview");
     }
   };
 
   const handleContinueGameClick = () => {
-    navigate("/gameview");
+    navigate("/react-sudoku/gameview");
   };
 
   const handleContinueGame = () => {
     setShowPrompt(false);
-    navigate("/gameview");
+    navigate("/react-sudoku/gameview");
   };
 
   const handleStartNewGame = () => {
     setShowPrompt(false);
     clearGameState();
-    navigate("/gameview");
+    navigate("/react-sudoku/gameview");
   };
 
   return (
@@ -46,8 +46,8 @@ const GameRouter = () => {
             />
           }
         />
-        <Route path="/gameview" element={<GameView />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/react-sudoku/gameview" element={<GameView />} />
+        <Route path="/react-sudoku/settings" element={<SettingsPage />} />
       </Routes>
       <NewGameDialog
         open={showPrompt}
