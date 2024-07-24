@@ -17,7 +17,7 @@ import {
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
 import NumericKeypad from "./NumericKeypad";
-import Timer from "./Timer"; // Import the Timer component
+import Timer from "./Timer";
 import {
   clearGameState,
   loadGameState,
@@ -34,6 +34,51 @@ const getInitialElapsedTime = () => {
     return parsedState.elapsedTime || 0;
   }
   return 0;
+};
+
+const countSolutions = (board: string[][]): number => {
+  const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let solutions = 0;
+
+  const solve = (board: string[][]): boolean => {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === "") {
+          for (const num of nums) {
+            const value = num.toString();
+            if (isValidMove(board, row, col, value)) {
+              board[row][col] = value;
+              if (solve(board)) {
+                solutions++;
+                if (solutions > 1) return true;
+              }
+              board[row][col] = "";
+            }
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  solve(board);
+  return solutions;
+};
+
+const generatePuzzle = (): string[][] => {
+  let solvedBoard: string[][] = [];
+  let puzzle: string[][] = [];
+  let uniqueSolution = false;
+
+  while (!uniqueSolution) {
+    solvedBoard = generateSolvedBoard();
+    puzzle = createPuzzle(solvedBoard, 30);
+    const puzzleCopy = puzzle.map((row) => row.slice());
+    uniqueSolution = countSolutions(puzzleCopy) === 1;
+  }
+
+  return puzzle;
 };
 
 export const GameBoard = () => {
@@ -65,16 +110,11 @@ export const GameBoard = () => {
       setIncorrectGuesses(savedState.incorrectGuesses || 0);
       setElapsedTime(savedState.elapsedTime || 0);
     } else {
-      generatePuzzle();
+      const puzzle = generatePuzzle();
+      setBoard(puzzle);
+      saveGameState(puzzle, initialNotes, 0, 0);
     }
   }, []);
-
-  const generatePuzzle = () => {
-    const solvedBoard = generateSolvedBoard();
-    const puzzle = createPuzzle(solvedBoard, 30);
-    setBoard(puzzle);
-    saveGameState(puzzle, initialNotes, 0, 0); // Initialize with 0 mistakes and 0 elapsed time
-  };
 
   const handleInputChange = (row: number, col: number, value: string) => {
     if (gameStatus !== "ongoing") return;
@@ -158,11 +198,15 @@ export const GameBoard = () => {
   };
 
   const handleNewGame = () => {
-    setGameStatus("ongoing");
+    clearGameState();
+    window.location.reload();
+    /* setGameStatus("ongoing");
     setIncorrectGuesses(0);
     setMistake(null);
-    setElapsedTime(0); // Reset the timer
-    generatePuzzle();
+    setElapsedTime(0);
+    const puzzle = generatePuzzle();
+    setBoard(puzzle);
+    saveGameState(puzzle, initialNotes, 0, 0); */
   };
 
   const handleBackToHome = () => {
@@ -184,7 +228,7 @@ export const GameBoard = () => {
   const handleTimeUpdate = (time: number) => {
     setElapsedTime(time);
     if (gameStatus === "ongoing") {
-      saveGameState(board, notes, incorrectGuesses, time); // Save time update
+      saveGameState(board, notes, incorrectGuesses, time);
     }
   };
 
@@ -211,7 +255,7 @@ export const GameBoard = () => {
                 value={1}
                 variant="outline-secondary"
                 id={"toggle-note-mode"}
-                style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }} // Adjust the size here
+                style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }}
               >
                 On
               </ToggleButton>
@@ -222,7 +266,7 @@ export const GameBoard = () => {
               <Timer
                 isActive={gameStatus === "ongoing"}
                 onTimeUpdate={handleTimeUpdate}
-                initialTime={elapsedTime} // Pass initialTime to Timer
+                initialTime={elapsedTime}
               />
             </Container>
           </Col>

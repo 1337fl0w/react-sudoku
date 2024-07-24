@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 interface TimerProps {
   isActive: boolean;
@@ -12,17 +12,16 @@ const Timer: React.FC<TimerProps> = ({
   initialTime,
 }) => {
   const [seconds, setSeconds] = useState(initialTime); // Initialize seconds with initialTime
+  const secondsRef = useRef(initialTime); // Use useRef to track the seconds
 
   useEffect(() => {
     let interval: number | null = null;
 
     if (isActive) {
       interval = window.setInterval(() => {
-        setSeconds((prevSeconds) => {
-          const newSeconds = prevSeconds + 1;
-          onTimeUpdate(newSeconds);
-          return newSeconds;
-        });
+        secondsRef.current += 1;
+        setSeconds(secondsRef.current);
+        onTimeUpdate(secondsRef.current);
       }, 1000);
     } else if (!isActive && seconds !== 0) {
       if (interval !== null) clearInterval(interval);
