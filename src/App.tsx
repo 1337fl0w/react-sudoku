@@ -8,11 +8,22 @@ import {
 import { ThemeProvider, useTheme } from "./theme/ThemeContext";
 import GameRouter from "./GameRouter";
 import "bootstrap/dist/css/bootstrap.min.css";
+import SplashScreen from "./components/SplashScreen";
+import { useState } from "react";
 
 const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
   return (
     <ThemeProvider>
-      <AppWithTheme />
+      {showSplash ? (
+        <SplashScreen onComplete={handleSplashComplete} />
+      ) : (
+        <AppWithTheme />
+      )}
     </ThemeProvider>
   );
 };

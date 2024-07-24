@@ -281,7 +281,7 @@ export const GameBoard = () => {
   const handleBackToHome = () => {
     clearGameState();
     setGameStatus("nogame");
-    navigate("/react-sudoku");
+    navigate("/react-sudoku/");
   };
 
   const handleNoteModeToggle = (value: boolean) => {
