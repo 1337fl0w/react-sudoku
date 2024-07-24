@@ -81,6 +81,15 @@ const generatePuzzle = (): string[][] => {
   return puzzle;
 };
 
+const calculateMultiplier = (elapsedTime: number): number => {
+  const maxTime = 60 * 60;
+  const multiplier = Math.max(
+    1,
+    1000 - Math.floor((999 * elapsedTime) / maxTime)
+  );
+  return multiplier;
+};
+
 export const GameBoard = () => {
   const [board, setBoard] = useState<string[][]>(initialBoard);
   const [notes, setNotes] = useState<string[][][]>(initialNotes);
@@ -99,6 +108,12 @@ export const GameBoard = () => {
   );
   const [highlightedNote, setHighlightedNote] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(getInitialElapsedTime);
+  const [points, setPoints] = useState(0);
+  const [highlightCompleted, setHighlightCompleted] = useState<{
+    row?: number;
+    col?: number;
+    subgrid?: { startRow: number; startCol: number };
+  } | null>(null);
 
   const { darkMode } = useTheme();
 
@@ -109,10 +124,11 @@ export const GameBoard = () => {
       setNotes(savedState.notes || initialNotes);
       setIncorrectGuesses(savedState.incorrectGuesses || 0);
       setElapsedTime(savedState.elapsedTime || 0);
+      setPoints(savedState.points || 0);
     } else {
       const puzzle = generatePuzzle();
       setBoard(puzzle);
-      saveGameState(puzzle, initialNotes, 0, 0);
+      saveGameState(puzzle, initialNotes, 0, 0, 0);
     }
   }, []);
 
@@ -132,9 +148,18 @@ export const GameBoard = () => {
           );
         }
         setNotes(newNotes);
-        saveGameState(newBoard, newNotes, incorrectGuesses, elapsedTime);
+        saveGameState(
+          newBoard,
+          newNotes,
+          incorrectGuesses,
+          elapsedTime,
+          points
+        );
       } else {
         if (value === "" || isValidMove(board, row, col, value)) {
+          const multiplier = calculateMultiplier(elapsedTime);
+          let newPoints = points + 1 * multiplier;
+
           newBoard[row][col] = value;
           newNotes[row][col] = [];
 
@@ -160,9 +185,52 @@ export const GameBoard = () => {
             }
           }
 
+          let completedRow = false;
+          if (newBoard[row].every((cell) => cell !== "")) {
+            newPoints += 5 * multiplier;
+            completedRow = true;
+          }
+
+          let completedCol = false;
+          if (newBoard.every((r) => r[col] !== "")) {
+            newPoints += 5 * multiplier;
+            completedCol = true;
+          }
+
+          let subgridComplete = true;
+          for (let i = startRow; i < startRow + 3; i++) {
+            for (let j = startCol; j < startCol + 3; j++) {
+              if (newBoard[i][j] === "") {
+                subgridComplete = false;
+                break;
+              }
+            }
+          }
+          if (subgridComplete) {
+            newPoints += 5 * multiplier;
+          }
+
+          if (completedRow || completedCol || subgridComplete) {
+            setHighlightCompleted({
+              row: completedRow ? row : undefined,
+              col: completedCol ? col : undefined,
+              subgrid: subgridComplete ? { startRow, startCol } : undefined,
+            });
+            setTimeout(() => {
+              setHighlightCompleted(null);
+            }, 500);
+          }
+
+          setPoints(newPoints);
           setBoard(newBoard);
           setNotes(newNotes);
-          saveGameState(newBoard, newNotes, incorrectGuesses, elapsedTime);
+          saveGameState(
+            newBoard,
+            newNotes,
+            incorrectGuesses,
+            elapsedTime,
+            newPoints
+          );
           checkWinCondition(newBoard);
           setMistake(null);
         } else {
@@ -174,7 +242,13 @@ export const GameBoard = () => {
           if (incorrectGuesses + 1 >= 3) {
             setGameStatus("lose");
           }
-          saveGameState(newBoard, newNotes, incorrectGuesses + 1, elapsedTime);
+          saveGameState(
+            newBoard,
+            newNotes,
+            incorrectGuesses + 1,
+            elapsedTime,
+            points
+          );
         }
       }
     }
@@ -193,6 +267,8 @@ export const GameBoard = () => {
         }
       }
     }
+    const multiplier = calculateMultiplier(elapsedTime);
+    setPoints(points + 10 * multiplier);
     setGameStatus("win");
     return true;
   };
@@ -221,7 +297,7 @@ export const GameBoard = () => {
   const handleTimeUpdate = (time: number) => {
     setElapsedTime(time);
     if (gameStatus === "ongoing") {
-      saveGameState(board, notes, incorrectGuesses, time);
+      saveGameState(board, notes, incorrectGuesses, time, points);
     }
   };
 
@@ -254,14 +330,16 @@ export const GameBoard = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </Col>
-          <Col>
-            <Container className="d-flex justify-content-center mb-3">
-              <Timer
-                isActive={gameStatus === "ongoing"}
-                onTimeUpdate={handleTimeUpdate}
-                initialTime={elapsedTime}
-              />
-            </Container>
+          <Col xs="auto">
+            <Timer
+              isActive={gameStatus === "ongoing"}
+              onTimeUpdate={handleTimeUpdate}
+              initialTime={elapsedTime}
+            />
+          </Col>
+          <Col xs="auto">
+            <p style={{ marginBottom: "0" }}>Points</p>
+            <p style={{ marginBottom: "0" }}>{points}</p>
           </Col>
           <Col className="text-end">
             <p style={{ marginBottom: "0" }}>Mistakes</p>
@@ -289,6 +367,7 @@ export const GameBoard = () => {
               handleBlur={() => {}}
               handleInputChange={handleInputChange}
               highlightedNote={highlightedNote}
+              highlightCompleted={highlightCompleted}
             />
           ))
         )}
@@ -331,6 +410,7 @@ export const GameBoard = () => {
             Time Taken:{" "}
             {new Date(elapsedTime * 1000).toISOString().substr(11, 8)}
           </p>
+          <p>Points: {points}</p>
         </Modal.Body>
         <Modal.Footer
           style={{
