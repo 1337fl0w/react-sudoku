@@ -17,7 +17,7 @@ import {
 } from "../models/Board";
 import SudokuCell from "./SudokuCell";
 import NumericKeypad from "./NumericKeypad";
-import Timer from "./Timer"; // Import the Timer component
+import Timer from "./Timer";
 import {
   clearGameState,
   loadGameState,
@@ -34,6 +34,60 @@ const getInitialElapsedTime = () => {
     return parsedState.elapsedTime || 0;
   }
   return 0;
+};
+
+const countSolutions = (board: string[][]): number => {
+  const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let solutions = 0;
+
+  const solve = (board: string[][]): boolean => {
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (board[row][col] === "") {
+          for (const num of nums) {
+            const value = num.toString();
+            if (isValidMove(board, row, col, value)) {
+              board[row][col] = value;
+              if (solve(board)) {
+                solutions++;
+                if (solutions > 1) return true;
+              }
+              board[row][col] = "";
+            }
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  solve(board);
+  return solutions;
+};
+
+const generatePuzzle = (): string[][] => {
+  let solvedBoard: string[][] = [];
+  let puzzle: string[][] = [];
+  let uniqueSolution = false;
+
+  while (!uniqueSolution) {
+    solvedBoard = generateSolvedBoard();
+    puzzle = createPuzzle(solvedBoard, 30);
+    const puzzleCopy = puzzle.map((row) => row.slice());
+    uniqueSolution = countSolutions(puzzleCopy) === 1;
+  }
+
+  return puzzle;
+};
+
+const calculateMultiplier = (elapsedTime: number): number => {
+  const maxTime = 60 * 60;
+  const multiplier = Math.max(
+    1,
+    1000 - Math.floor((999 * elapsedTime) / maxTime)
+  );
+  return multiplier;
 };
 
 export const GameBoard = () => {
@@ -54,6 +108,12 @@ export const GameBoard = () => {
   );
   const [highlightedNote, setHighlightedNote] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(getInitialElapsedTime);
+  const [points, setPoints] = useState(0);
+  const [highlightCompleted, setHighlightCompleted] = useState<{
+    row?: number;
+    col?: number;
+    subgrid?: { startRow: number; startCol: number };
+  } | null>(null);
 
   const { darkMode } = useTheme();
 
@@ -64,17 +124,13 @@ export const GameBoard = () => {
       setNotes(savedState.notes || initialNotes);
       setIncorrectGuesses(savedState.incorrectGuesses || 0);
       setElapsedTime(savedState.elapsedTime || 0);
+      setPoints(savedState.points || 0);
     } else {
-      generatePuzzle();
+      const puzzle = generatePuzzle();
+      setBoard(puzzle);
+      saveGameState(puzzle, initialNotes, 0, 0, 0);
     }
   }, []);
-
-  const generatePuzzle = () => {
-    const solvedBoard = generateSolvedBoard();
-    const puzzle = createPuzzle(solvedBoard, 30);
-    setBoard(puzzle);
-    saveGameState(puzzle, initialNotes, 0, 0); // Initialize with 0 mistakes and 0 elapsed time
-  };
 
   const handleInputChange = (row: number, col: number, value: string) => {
     if (gameStatus !== "ongoing") return;
@@ -92,9 +148,18 @@ export const GameBoard = () => {
           );
         }
         setNotes(newNotes);
-        saveGameState(newBoard, newNotes, incorrectGuesses, elapsedTime);
+        saveGameState(
+          newBoard,
+          newNotes,
+          incorrectGuesses,
+          elapsedTime,
+          points
+        );
       } else {
         if (value === "" || isValidMove(board, row, col, value)) {
+          const multiplier = calculateMultiplier(elapsedTime);
+          let newPoints = points + 1 * multiplier;
+
           newBoard[row][col] = value;
           newNotes[row][col] = [];
 
@@ -120,9 +185,52 @@ export const GameBoard = () => {
             }
           }
 
+          let completedRow = false;
+          if (newBoard[row].every((cell) => cell !== "")) {
+            newPoints += 5 * multiplier;
+            completedRow = true;
+          }
+
+          let completedCol = false;
+          if (newBoard.every((r) => r[col] !== "")) {
+            newPoints += 5 * multiplier;
+            completedCol = true;
+          }
+
+          let subgridComplete = true;
+          for (let i = startRow; i < startRow + 3; i++) {
+            for (let j = startCol; j < startCol + 3; j++) {
+              if (newBoard[i][j] === "") {
+                subgridComplete = false;
+                break;
+              }
+            }
+          }
+          if (subgridComplete) {
+            newPoints += 5 * multiplier;
+          }
+
+          if (completedRow || completedCol || subgridComplete) {
+            setHighlightCompleted({
+              row: completedRow ? row : undefined,
+              col: completedCol ? col : undefined,
+              subgrid: subgridComplete ? { startRow, startCol } : undefined,
+            });
+            setTimeout(() => {
+              setHighlightCompleted(null);
+            }, 500);
+          }
+
+          setPoints(newPoints);
           setBoard(newBoard);
           setNotes(newNotes);
-          saveGameState(newBoard, newNotes, incorrectGuesses, elapsedTime);
+          saveGameState(
+            newBoard,
+            newNotes,
+            incorrectGuesses,
+            elapsedTime,
+            newPoints
+          );
           checkWinCondition(newBoard);
           setMistake(null);
         } else {
@@ -134,7 +242,13 @@ export const GameBoard = () => {
           if (incorrectGuesses + 1 >= 3) {
             setGameStatus("lose");
           }
-          saveGameState(newBoard, newNotes, incorrectGuesses + 1, elapsedTime);
+          saveGameState(
+            newBoard,
+            newNotes,
+            incorrectGuesses + 1,
+            elapsedTime,
+            points
+          );
         }
       }
     }
@@ -153,16 +267,15 @@ export const GameBoard = () => {
         }
       }
     }
+    const multiplier = calculateMultiplier(elapsedTime);
+    setPoints(points + 10 * multiplier);
     setGameStatus("win");
     return true;
   };
 
   const handleNewGame = () => {
-    setGameStatus("ongoing");
-    setIncorrectGuesses(0);
-    setMistake(null);
-    setElapsedTime(0); // Reset the timer
-    generatePuzzle();
+    clearGameState();
+    window.location.reload();
   };
 
   const handleBackToHome = () => {
@@ -184,7 +297,7 @@ export const GameBoard = () => {
   const handleTimeUpdate = (time: number) => {
     setElapsedTime(time);
     if (gameStatus === "ongoing") {
-      saveGameState(board, notes, incorrectGuesses, time); // Save time update
+      saveGameState(board, notes, incorrectGuesses, time, points);
     }
   };
 
@@ -211,20 +324,22 @@ export const GameBoard = () => {
                 value={1}
                 variant="outline-secondary"
                 id={"toggle-note-mode"}
-                style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }} // Adjust the size here
+                style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem" }}
               >
                 On
               </ToggleButton>
             </ToggleButtonGroup>
           </Col>
-          <Col>
-            <Container className="d-flex justify-content-center mb-3">
-              <Timer
-                isActive={gameStatus === "ongoing"}
-                onTimeUpdate={handleTimeUpdate}
-                initialTime={elapsedTime} // Pass initialTime to Timer
-              />
-            </Container>
+          <Col xs="auto">
+            <Timer
+              isActive={gameStatus === "ongoing"}
+              onTimeUpdate={handleTimeUpdate}
+              initialTime={elapsedTime}
+            />
+          </Col>
+          <Col xs="auto">
+            <p style={{ marginBottom: "0" }}>Points</p>
+            <p style={{ marginBottom: "0" }}>{points}</p>
           </Col>
           <Col className="text-end">
             <p style={{ marginBottom: "0" }}>Mistakes</p>
@@ -252,6 +367,7 @@ export const GameBoard = () => {
               handleBlur={() => {}}
               handleInputChange={handleInputChange}
               highlightedNote={highlightedNote}
+              highlightCompleted={highlightCompleted}
             />
           ))
         )}
@@ -294,6 +410,7 @@ export const GameBoard = () => {
             Time Taken:{" "}
             {new Date(elapsedTime * 1000).toISOString().substr(11, 8)}
           </p>
+          <p>Points: {points}</p>
         </Modal.Body>
         <Modal.Footer
           style={{

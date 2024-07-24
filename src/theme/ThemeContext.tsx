@@ -19,7 +19,6 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    // Load the initial state from localStorage if available
     const savedDarkMode = localStorage.getItem("darkMode");
     return savedDarkMode ? JSON.parse(savedDarkMode) : false;
   });

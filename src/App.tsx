@@ -5,7 +5,7 @@ import {
   createTheme,
   CssBaseline,
 } from "@mui/material";
-import { ThemeProvider, useTheme } from "./theme/ThemeContext"; // Import the ThemeProvider and custom hook
+import { ThemeProvider, useTheme } from "./theme/ThemeContext";
 import GameRouter from "./GameRouter";
 import "bootstrap/dist/css/bootstrap.min.css";
 
