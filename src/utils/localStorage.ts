@@ -2,9 +2,9 @@ const saveGameState = (
   board: string[][],
   notes: string[][][],
   incorrectGuesses: number,
-  elapsedTime: number // Add elapsedTime parameter
+  elapsedTime: number
 ) => {
-  const gameState = { board, notes, incorrectGuesses, elapsedTime }; // Include elapsedTime in gameState
+  const gameState = { board, notes, incorrectGuesses, elapsedTime };
   localStorage.setItem("sudoku-game-state", JSON.stringify(gameState));
 };
 
@@ -12,7 +12,7 @@ const loadGameState = (): {
   board: string[][];
   notes: string[][][];
   incorrectGuesses: number;
-  elapsedTime: number; // Add elapsedTime to the return type
+  elapsedTime: number;
 } | null => {
   const savedState = localStorage.getItem("sudoku-game-state");
   return savedState ? JSON.parse(savedState) : null;

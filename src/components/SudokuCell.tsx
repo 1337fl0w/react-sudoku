@@ -56,7 +56,7 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
           ? "red"
           : isFocused
           ? darkMode
-            ? "rgba(255, 255, 255, 0.4)" // Brighter background for the focused cell
+            ? "rgba(255, 255, 255, 0.4)"
             : "rgba(0, 0, 0, 0.2)"
           : isHighlighted
           ? darkMode

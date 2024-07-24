@@ -200,13 +200,6 @@ export const GameBoard = () => {
   const handleNewGame = () => {
     clearGameState();
     window.location.reload();
-    /* setGameStatus("ongoing");
-    setIncorrectGuesses(0);
-    setMistake(null);
-    setElapsedTime(0);
-    const puzzle = generatePuzzle();
-    setBoard(puzzle);
-    saveGameState(puzzle, initialNotes, 0, 0); */
   };
 
   const handleBackToHome = () => {
