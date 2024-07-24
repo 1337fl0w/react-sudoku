@@ -25,7 +25,7 @@ A simple yet feature-rich Sudoku app built with React. This app offers a classic
 3. Click add to home screen
 
 
-## Cloning and building the app yourself
+## Cloning and running the app
 
 1. Clone the repository:
 
