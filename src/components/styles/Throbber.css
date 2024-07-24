@@ -1,0 +1,57 @@
+/* Throbber.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap');
+
+.throbber-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.throbber-text {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  position: absolute;
+  z-index: 10;
+}
+
+.inner-circle,
+.outer-circle {
+  position: absolute;
+  border: 6px solid transparent;
+  border-radius: 50%;
+}
+
+.inner-circle {
+  width: 130px;
+  height: 130px;
+  animation: spin-inner 2s linear infinite;
+}
+
+.outer-circle {
+  width: 150px;
+  height: 150px;
+  animation: spin-outer 2.5s linear infinite;
+}
+
+@keyframes spin-inner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-outer {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}

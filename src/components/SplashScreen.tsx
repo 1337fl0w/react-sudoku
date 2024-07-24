@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useTheme } from "../theme/ThemeContext";
-import appIcon from "../media/pwa-512x512.png";
+import Throbber from "./Throbber";
 
 const SplashScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const { darkMode } = useTheme();
@@ -36,16 +36,16 @@ const SplashScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
       <style>{keyframes}</style>
       <Row>
         <Col className="text-center">
-          <img
-            src={appIcon}
-            alt="Sudoku Logo"
+          <div
             style={{
               width: "150px",
               marginBottom: "20px",
               borderRadius: "15px",
               ...pulsingAnimation,
             }}
-          />
+          >
+            <Throbber />
+          </div>
         </Col>
       </Row>
     </Container>
