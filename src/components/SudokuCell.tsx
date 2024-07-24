@@ -13,6 +13,11 @@ interface SudokuCellProps {
   handleBlur: () => void;
   handleInputChange: (row: number, col: number, value: string) => void;
   highlightedNote: string | null;
+  highlightCompleted: {
+    row?: number;
+    col?: number;
+    subgrid?: { startRow: number; startCol: number };
+  } | null;
 }
 
 const SudokuCell: React.FC<SudokuCellProps> = ({
@@ -27,6 +32,7 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   handleFocus,
   handleBlur,
   highlightedNote,
+  highlightCompleted,
 }) => {
   const isTopEdge = rowIndex % 3 === 0;
   const isBottomEdge = rowIndex % 3 === 2;
@@ -46,7 +52,17 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
   const isMistake =
     mistake && mistake.row === rowIndex && mistake.col === colIndex;
 
+  const isCompleted =
+    highlightCompleted?.row === rowIndex ||
+    highlightCompleted?.col === colIndex ||
+    (highlightCompleted?.subgrid &&
+      rowIndex >= highlightCompleted.subgrid.startRow &&
+      rowIndex < highlightCompleted.subgrid.startRow + 3 &&
+      colIndex >= highlightCompleted.subgrid.startCol &&
+      colIndex < highlightCompleted.subgrid.startCol + 3);
+
   const highlightColor = darkMode ? "yellow" : "purple";
+  const completedColor = "rgba(0, 255, 0, 0.5)";
 
   return (
     <Container
@@ -54,9 +70,11 @@ const SudokuCell: React.FC<SudokuCellProps> = ({
         position: "relative",
         backgroundColor: isMistake
           ? "red"
+          : isCompleted
+          ? completedColor
           : isFocused
           ? darkMode
-            ? "rgba(255, 255, 255, 0.4)" // Brighter background for the focused cell
+            ? "rgba(255, 255, 255, 0.4)"
             : "rgba(0, 0, 0, 0.2)"
           : isHighlighted
           ? darkMode

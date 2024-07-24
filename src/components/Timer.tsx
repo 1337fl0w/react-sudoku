@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 interface TimerProps {
   isActive: boolean;
-  onTimeUpdate: (time: number) => void; // Callback to send the elapsed time to the parent component
-  initialTime: number; // Initial time passed from the parent component
+  onTimeUpdate: (time: number) => void;
+  initialTime: number;
 }
 
 const Timer: React.FC<TimerProps> = ({
@@ -11,18 +11,17 @@ const Timer: React.FC<TimerProps> = ({
   onTimeUpdate,
   initialTime,
 }) => {
-  const [seconds, setSeconds] = useState(initialTime); // Initialize seconds with initialTime
+  const [seconds, setSeconds] = useState(initialTime);
+  const secondsRef = useRef(initialTime);
 
   useEffect(() => {
     let interval: number | null = null;
 
     if (isActive) {
       interval = window.setInterval(() => {
-        setSeconds((prevSeconds) => {
-          const newSeconds = prevSeconds + 1;
-          onTimeUpdate(newSeconds);
-          return newSeconds;
-        });
+        secondsRef.current += 1;
+        setSeconds(secondsRef.current);
+        onTimeUpdate(secondsRef.current);
       }, 1000);
     } else if (!isActive && seconds !== 0) {
       if (interval !== null) clearInterval(interval);
